@@ -1,0 +1,186 @@
+AITradeGame 本机 Windows + 虚拟环境启动教程
+=========================================
+
+项目路径示例：d:\Andy\coding\AITradeGame\AITradeGame
+Python 版本：推荐 Python 3.9 及以上
+
+-----------------------------------------
+一、第一次运行（完整步骤）
+-----------------------------------------
+
+1. 打开终端
+   - 建议使用 Windows PowerShell
+   - 在开始菜单中搜索「PowerShell」并打开
+
+2. 进入项目目录
+   在 PowerShell 中执行（根据你实际路径调整）：
+
+   cd d:\Andy\coding\AITradeGame\AITradeGame
+
+3. 创建虚拟环境（如 venv 目录尚不存在）
+
+   python -m venv venv
+
+   执行完成后，项目目录下会多出一个 venv 文件夹。
+
+4. 激活虚拟环境
+   - PowerShell：
+
+     .\venv\Scripts\Activate.ps1
+
+   - 如果你在 cmd.exe 中：
+
+     .\venv\Scripts\activate.bat
+
+   激活成功后，命令行前面会出现类似 "(venv)" 的前缀。
+
+5. 安装依赖
+
+   pip install -r requirements.txt
+
+6.（可选）先测试 API 连接
+
+   python test_api_connection.py
+
+   如果能正常返回各个数据源的状态，说明网络和依赖基本正常。
+
+7. 启动应用（两种推荐方式）
+
+   方式 A：在当前窗口直接运行 Flask（最直观）
+
+   python app.py
+
+   方式 B：使用提供的 PowerShell 启动脚本（自动检查虚拟环境和端口）
+
+   在已激活 venv 的 PowerShell 中执行：
+
+   .\start_flask.ps1
+
+   该脚本会：
+   - 检查当前目录是否包含 app.py
+   - 检查虚拟环境中是否存在 .\venv\Scripts\python.exe
+   - 检查 5000 端口是否被占用，并尝试关闭旧的 Flask 进程
+   - 使用虚拟环境里的 python 启动 app.py
+   - 简单验证前端 API 是否正常
+
+8. 访问 Web 界面
+   打开浏览器访问：
+   - 本机访问：  http://localhost:5000
+
+-----------------------------------------
+二、后续启动（虚拟环境已创建的情况下）
+-----------------------------------------
+
+以后每次使用，只需要：
+
+1. 打开 PowerShell
+2. 进入项目目录：
+
+   cd d:\Andy\coding\AITradeGame\AITradeGame
+
+3. 激活虚拟环境：
+
+   .\venv\Scripts\Activate.ps1
+
+4. 启动应用（二选一）：
+
+   方式 A：
+
+   python app.py
+
+   方式 B（推荐，自动检查端口）：
+
+   .\start_flask.ps1
+
+5. 浏览器访问：
+
+   http://localhost:5000
+
+-----------------------------------------
+三、使用 run.bat 的说明
+-----------------------------------------
+
+项目目录中有一个 run.bat，内容等价于直接执行：
+
+   python app.py
+
+如果你已经在命令行里激活了虚拟环境，并且当前目录就是项目目录，可以执行：
+
+   .\run.bat
+
+注意：如果直接在资源管理器中双击 run.bat，它会在新的 cmd 窗口中运行，通常不会自动使用虚拟环境中的 python，而是使用系统默认的 python 解释器，不是严格意义上的「在 venv 中运行」。
+
+-----------------------------------------
+四、停止服务和退出虚拟环境
+-----------------------------------------
+
+1. 停止 Flask 服务
+   - 在运行 app.py 的终端窗口中按：
+
+     Ctrl + C
+
+2. 退出虚拟环境
+   在同一个终端中执行：
+
+   deactivate
+
+   看到前面的 "(venv)" 前缀消失，说明已退出虚拟环境。
+
+-----------------------------------------
+五、常见问题简要说明
+-----------------------------------------
+
+1. 虚拟环境激活失败（Execution Policy 限制）
+   在 PowerShell 中执行 Activate.ps1 时，如果出现类似「无法加载文件，因为在此系统上禁止运行脚本」的错误，可以：
+
+   以当前用户身份放宽脚本执行策略（建议只对当前用户）：
+
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+   然后重新打开一个新的 PowerShell 窗口，再执行：
+
+   .\venv\Scripts\Activate.ps1
+
+2. 端口 5000 已被占用
+   启动时如果看到 "Address already in use" 或者脚本提示端口被占用：
+
+   - 查找占用 5000 端口的进程：
+
+     netstat -ano | findstr :5000
+
+   - 记下最后一列的 PID，结束该进程（例如 12345）：
+
+     taskkill /PID 12345 /F
+
+   - 然后重新执行 python app.py 或 .\start_flask.ps1
+
+   如果需要修改端口，可以编辑 app.py 最底部的 app.run 调用，将 port=5000 改成其他端口，例如：
+
+   app.run(debug=False, host='0.0.0.0', port=5001, use_reloader=False)
+
+3. 需要走代理访问加密货币 API
+   如果你所在的网络环境访问某些 API 有限制，可以为本进程设置代理：
+
+   在 PowerShell 中先设置环境变量：
+
+   $env:CRYPTO_PROXY = "http://你的代理地址:端口"
+
+   然后再启动应用，例如：
+
+   .\venv\Scripts\Activate.ps1
+   $env:CRYPTO_PROXY = "http://127.0.0.1:7890"
+   python app.py
+
+   或：
+
+   .\venv\Scripts\Activate.ps1
+   $env:CRYPTO_PROXY = "http://127.0.0.1:7890"
+   .\start_flask.ps1
+
+-----------------------------------------
+六、简单使用流程小结
+-----------------------------------------
+
+1. 第一次：创建并激活 venv → 安装依赖 →（可选）测试 API → 启动 app.py
+2. 以后：激活 venv → 启动 app.py 或运行 .\start_flask.ps1
+3. 浏览器访问 http://localhost:5000，按照页面提示添加 AI 模型并开始交易模拟。

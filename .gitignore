@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Backup files
+*.bak
+*.backup
+*_backup.*
+
+# ========== 以下为新增排除项 ==========
+
+# 私密文件目录（含 API 密钥、服务器 IP 等敏感信息）
+私密文件_请勿上传/
+
+# 服务器运行日志（含 IP 和运行信息）
+nohup.out
+
+# 交易日志报告（可能含敏感交易数据）
+trading_log_report.html
+trading_log_report.txt
+
+# 含本地路径的启动脚本
+start_flask.ps1
+
+# 配置文件（可能包含密钥）
+config.py
+
+# 副本文件
+*副本*
+
+# 临时创建的脚本（含 token）
+create_github_repo.py
+debug_api.py

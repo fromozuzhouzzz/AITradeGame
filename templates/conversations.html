@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI交易对话 - 完整视图</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #3370ff;
+            --profit: #f53f3f;
+            --loss: #00b42a;
+            --warning: #ff7d00;
+            --info: #165dff;
+            --bg-1: #ffffff;
+            --bg-2: #f7f8fa;
+            --bg-3: #f2f3f5;
+            --text-1: #1d2129;
+            --text-2: #4e5969;
+            --text-3: #86909c;
+            --border-1: #e5e6eb;
+            --border-2: #c9cdd4;
+            --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-3: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 
+                         'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            font-size: 14px;
+            color: var(--text-1);
+            background: var(--bg-2);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            background: var(--bg-1);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-icon {
+            font-size: 28px;
+        }
+
+        .btn-close-window {
+            padding: 10px 20px;
+            background: var(--bg-2);
+            color: var(--text-2);
+            border: 1px solid var(--border-1);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-close-window:hover {
+            background: var(--bg-3);
+        }
+
+        .conversations-container {
+            background: var(--bg-1);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-2);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-3);
+            font-size: 16px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-3);
+            font-size: 16px;
+        }
+
+        /* Trading Decision Cards */
+        .trading-decision-entry {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-1);
+        }
+
+        .decision-timestamp {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, #2b5ce6 100%);
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .timestamp-icon {
+            font-size: 20px;
+        }
+
+        .decision-overview {
+            background: #e7f3ff;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .overview-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .overview-stats {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: var(--text-2);
+        }
+
+        .overview-stat {
+            display: flex;
+            align-items: center;
+        }
+
+        /* 列表式布局 */
+        .coin-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .coin-row {
+            background: #ffffff;
+            border: 1px solid var(--border-1);
+            border-radius: 8px;
+            padding: 12px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .coin-row:hover {
+            background: var(--bg-2);
+            border-color: var(--border-2);
+        }
+
+        .coin-row.action-row {
+            border-left: 4px solid #f53f3f;
+            background: linear-gradient(90deg, #fff5f5 0%, #ffffff 100%);
+        }
+
+        .row-main {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .row-coin {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 160px;
+        }
+
+        .row-coin-icon {
+            font-size: 20px;
+        }
+
+        .row-coin-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-1);
+        }
+
+        .row-coin-fullname {
+            font-size: 12px;
+            color: var(--text-3);
+        }
+
+        .row-signal {
+            min-width: 120px;
+        }
+
+        .row-params {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .row-param {
+            font-size: 12px;
+            color: var(--text-2);
+            white-space: nowrap;
+        }
+
+        .row-confidence {
+            min-width: 80px;
+            text-align: right;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .row-justification {
+            background: var(--bg-2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--text-2);
+            line-height: 1.5;
+            margin-top: 4px;
+        }
+
+        .signal-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .signal-badge.signal-buy {
+            background: #ffe7e7;
+            color: #c41e1e;
+            border: 2px solid #f53f3f;
+        }
+
+        .signal-badge.signal-sell {
+            background: #e8ffea;
+            color: #0d7a1f;
+            border: 2px solid #00b42a;
+        }
+
+        .signal-badge.signal-add {
+            background: #fff3e6;
+            color: #d46b08;
+            border: 2px solid #ff7d00;
+        }
+
+        .signal-badge.signal-reduce {
+            background: #f5e6ff;
+            color: #531dab;
+            border: 2px solid #722ed1;
+        }
+
+        .signal-badge.signal-close {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffc107;
+        }
+
+        .signal-badge.signal-hold {
+            background: #e2e3e5;
+            color: #383d41;
+            border: 2px solid #6c757d;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f3f5;
+            font-size: 13px;
+        }
+
+        .detail-row:last-of-type {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--text-3);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: var(--text-1);
+            font-weight: 600;
+        }
+
+        /* 信心度颜色（中国股市习惯：红高绿低） */
+        .confidence-high {
+            color: #f53f3f;  /* 高信心度 - 红色 */
+        }
+
+        .confidence-medium {
+            color: #ff7d00;  /* 中信心度 - 橙色 */
+        }
+
+        .confidence-low {
+            color: #00b42a;  /* 低信心度 - 绿色 */
+        }
+
+        .justification-box {
+            background: var(--bg-2);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-style: italic;
+            color: var(--text-2);
+            line-height: 1.6;
+            font-size: 13px;
+        }
+
+        /* 原始对话格式 */
+        .conversation-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-1);
+        }
+
+        .conversation-item:last-child {
+            border-bottom: none;
+        }
+
+        .conversation-time {
+            font-size: 12px;
+            color: var(--text-3);
+            margin-bottom: 8px;
+        }
+
+        .conversation-content {
+            background: var(--bg-2);
+            padding: 12px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            color: var(--text-2);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="header-icon">💬</span>
+                AI交易对话 - 完整视图
+            </h1>
+            <button class="btn-close-window" onclick="window.close()">
+                <i class="bi bi-x-lg"></i>
+                <span>关闭窗口</span>
+            </button>
+        </div>
+
+        <div class="conversations-container">
+            <div id="conversationsContent" class="loading">
+                <i class="bi bi-hourglass-split"></i> 加载中...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modelId = {{ model_id }};
+
+        async function loadConversations() {
+            try {
+                const response = await fetch(`/api/models/${modelId}/conversations?limit=100`);
+                const conversations = await response.json();
+                renderConversations(conversations);
+            } catch (error) {
+                console.error('Failed to load conversations:', error);
+                document.getElementById('conversationsContent').innerHTML = 
+                    '<div class="empty-state">加载失败，请刷新页面重试</div>';
+            }
+        }
+
+        function renderConversations(conversations) {
+            const container = document.getElementById('conversationsContent');
+
+            if (conversations.length === 0) {
+                container.innerHTML = '<div class="empty-state">暂无对话记录</div>';
+                return;
+            }
+
+            container.innerHTML = conversations.map(conv => {
+                const timestamp = new Date(conv.timestamp.replace(' ', 'T') + 'Z')
+                    .toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+
+                // 尝试解析为交易决策JSON
+                let decisions = null;
+                try {
+                    // 增强的JSON解析：处理包含```json标记的原始文本格式
+                    let jsonText = conv.ai_response.trim();
+
+                    // 如果包含```json标记，提取其中的JSON内容
+                    if (jsonText.includes('```json')) {
+                        const jsonMatch = jsonText.match(/```json\s*([\s\S]*?)\s*```/);
+                        if (jsonMatch && jsonMatch[1]) {
+                            jsonText = jsonMatch[1].trim();
+                        }
+                    } else if (jsonText.includes('```')) {
+                        // 处理只有```标记的情况
+                        const jsonMatch = jsonText.match(/```\s*([\s\S]*?)\s*```/);
+                        if (jsonMatch && jsonMatch[1]) {
+                            jsonText = jsonMatch[1].trim();
+                        }
+                    }
+
+                    // 尝试解析JSON
+                    decisions = JSON.parse(jsonText);
+                    if (typeof decisions === 'object' && decisions !== null) {
+                        return renderTradingDecision(timestamp, decisions);
+                    }
+                } catch (e) {
+                    // JSON解析失败，使用原始格式显示
+                    console.log('Failed to parse JSON:', e);
+                }
+
+                // 原始文本显示
+                return `
+                    <div class="conversation-item">
+                        <div class="conversation-time">${timestamp}</div>
+                        <div class="conversation-content">${escapeHtml(conv.ai_response)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderTradingDecision(timestamp, decisions) {
+            const coins = Object.keys(decisions);
+            const totalCoins = coins.length;
+            const actionCount = coins.filter(coin => {
+                const signal = decisions[coin]?.signal;
+                return signal && signal !== 'hold';
+            }).length;
+            const holdCount = totalCoins - actionCount;
+
+            const coinRows = coins.map(coin => renderCoinRow(coin, decisions[coin])).join('');
+
+            return `
+                <div class="trading-decision-entry">
+                    <div class="decision-timestamp">
+                        <span class="timestamp-icon">📅</span>
+                        <span class="timestamp-text">${timestamp}</span>
+                    </div>
+
+                    <div class="decision-overview">
+                        <h3 class="overview-title">📊 决策概览</h3>
+                        <div class="overview-stats">
+                            <span class="overview-stat">• 分析币种: <strong>${totalCoins} 个</strong></span>
+                            <span class="overview-stat">• 执行操作: <strong>${actionCount} 个</strong></span>
+                            <span class="overview-stat">• 持有观望: <strong>${holdCount} 个</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="coin-list">
+                        ${coinRows}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCoinRow(coin, decision) {
+            const signal = decision?.signal || 'unknown';
+            const quantity = decision?.quantity || 0;
+            const leverage = decision?.leverage || 0;
+            const profitTarget = decision?.profit_target || 0;
+            const stopLoss = decision?.stop_loss || 0;
+            const confidence = decision?.confidence || 0;
+            const justification = decision?.justification || 'N/A';
+
+            const signalMap = {
+                'buy_to_enter': { emoji: '🔴', text: '买入开多', class: 'buy' },
+                'sell_to_enter': { emoji: '🟢', text: '卖出开空', class: 'sell' },
+                'close_position': { emoji: '🟡', text: '平仓', class: 'close' },
+                'hold': { emoji: '⚪', text: '持有', class: 'hold' }
+            };
+
+            const signalInfo = signalMap[signal] || { emoji: '❓', text: signal, class: 'unknown' };
+
+            const coinNames = {
+                'BTC': '比特币', 'ETH': '以太坊', 'SOL': 'Solana',
+                'XRP': '瑞波币', 'DOGE': '狗狗币', 'BNB': '币安币'
+            };
+            const coinName = coinNames[coin] || coin;
+
+            const coinIcons = {
+                'BTC': '₿', 'ETH': 'Ξ', 'SOL': '◎',
+                'XRP': '✕', 'DOGE': 'Ð', 'BNB': '🔶'
+            };
+            const coinIcon = coinIcons[coin] || '🪙';
+
+            const confidencePercent = Math.round(confidence * 100);
+            let confidenceClass = 'low';
+            let confidenceIcon = '⚠️';
+            let confidenceLevel = '低';
+
+            if (confidencePercent >= 80) {
+                confidenceClass = 'high';
+                confidenceIcon = '🔥';
+                confidenceLevel = '高';
+            } else if (confidencePercent >= 60) {
+                confidenceClass = 'medium';
+                confidenceIcon = '✅';
+                confidenceLevel = '中';
+            }
+
+            const isAction = signal !== 'hold';
+            const rowClass = isAction ? 'coin-row action-row' : 'coin-row';
+
+            let paramsHtml = '';
+            if (isAction) {
+                paramsHtml = `
+                    <span class="row-param">📊 ${quantity.toFixed(4)}</span>
+                    <span class="row-param">⚡ ${leverage}x</span>
+                    ${profitTarget > 0 ? `<span class="row-param">🎯 $${profitTarget.toFixed(2)}</span>` : '<span class="row-param">-</span>'}
+                    ${stopLoss > 0 ? `<span class="row-param">🛑 $${stopLoss.toFixed(2)}</span>` : '<span class="row-param">-</span>'}
+                `;
+            } else {
+                paramsHtml = `
+                    <span class="row-param">-</span>
+                    <span class="row-param">-</span>
+                    <span class="row-param">-</span>
+                    <span class="row-param">-</span>
+                `;
+            }
+
+            return `
+                <div class="${rowClass}">
+                    <div class="row-main">
+                        <div class="row-coin">
+                            <span class="row-coin-icon">${coinIcon}</span>
+                            <span class="row-coin-name">${coin}</span>
+                            <span class="row-coin-fullname">${coinName}</span>
+                        </div>
+                        <div class="row-signal">
+                            <span class="signal-badge signal-${signalInfo.class}">
+                                ${signalInfo.emoji} ${signalInfo.text}
+                            </span>
+                        </div>
+                        <div class="row-params">
+                            ${paramsHtml}
+                        </div>
+                        <div class="row-confidence">
+                            <span class="confidence-${confidenceClass}">
+                                ${confidenceIcon} ${confidencePercent}%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row-justification">
+                        📝 ${escapeHtml(justification)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 页面加载时获取对话
+        loadConversations();
+
+        // 每30秒自动刷新
+        setInterval(loadConversations, 30000);
+    </script>
+</body>
+</html>
+
